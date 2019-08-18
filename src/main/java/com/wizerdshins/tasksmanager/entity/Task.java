@@ -1,10 +1,7 @@
 package com.wizerdshins.tasksmanager.entity;
 
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -14,11 +11,18 @@ public class Task {
     @Id
     @GeneratedValue
     private Integer id;
+
+    @Column
     private String message;
+    @Column(name = "date_create")
     private LocalDate dateCreate;
+    @Column(name = "date_complete")
     private LocalDate dateComplete;
+    @Column
     private String status;
 
+    @ManyToOne
+    @JoinColumn(name = "company_id")
     private Company company;
 
     /* TODO override equals & hashcode */

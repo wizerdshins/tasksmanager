@@ -1,8 +1,7 @@
 package com.wizerdshins.tasksmanager.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.List;
 
 @Entity
 public class Company {
@@ -10,11 +9,17 @@ public class Company {
     @Id
     @GeneratedValue
     private Integer id;
+    @Column
     private String name;
+    @Column
     private String address;
+    @Column
     private String phone;
 
     /* TODO override equals & hashcode */
+
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
+    List<Task> tasks;
 
     public Company() {}
 
@@ -54,5 +59,18 @@ public class Company {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public List<Task> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }
