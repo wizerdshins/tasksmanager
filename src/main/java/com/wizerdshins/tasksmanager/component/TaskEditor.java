@@ -1,5 +1,6 @@
 package com.wizerdshins.tasksmanager.component;
 
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.notification.Notification;
@@ -23,9 +24,14 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
 
     private Task removeTask;
 
-    private Button saveButton = new Button("Delete");
+    private Button saveButton = new Button("Save");
+    private Button deleteButton = new Button("Delete");
+    private Button cancelButton = new Button("Cancel");
+
     private TextField editMessage = new TextField();
-    private HorizontalLayout editFormLayout = new HorizontalLayout(editMessage, saveButton);
+
+    private HorizontalLayout editFormLayout = new HorizontalLayout(
+            editMessage, saveButton, deleteButton, cancelButton);
 
     /* TODO add more components */
 
@@ -44,20 +50,46 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
         this.taskRepository = taskRepository;
 
         add(editFormLayout);
-//        editTaskBinder.bindInstanceFields(this);
+
         editTaskBinder.forField(editMessage)
                       .bind(Task::getMessage, Task::setMessage);
 
         saveButton.getElement().getThemeList().add("primary"); // wtf?
-        saveButton.addClickListener(click -> delete());
+        deleteButton.getElement().getThemeList().add("secondary");
+        cancelButton.getElement().getThemeList().add("tertiary");
+
+        addKeyPressListener(Key.ENTER, click -> save(removeTask));
+
+        saveButton.addClickListener(click -> save(removeTask));
+        deleteButton.addClickListener(click -> delete());
+        cancelButton.addClickListener(click -> {
+           setVisible(false);
+        });
 
         setSpacing(true);
-
         setVisible(false);
+    }
+
+    private void save(Task updatedTask) {
+
+        Task task = updatedTask;
+        updatedTask.setMessage(editMessage.getValue());
+        taskRepository.save(task);
+        Notification.show(
+                "Task \'" + removeTask.getMessage() + "\' has been edited",
+                2000,
+                Notification.Position.TOP_END);
+
+        changeHandler.onChange();
     }
 
     private void delete() {
         taskRepository.delete(removeTask);
+        Notification.show(
+                "Task \'" + removeTask.getMessage() + "\' has been deleted",
+                2000,
+                Notification.Position.TOP_END);
+
         changeHandler.onChange();
     }
 
@@ -75,7 +107,10 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
         }
         editTaskBinder.setBean(task);
 
-        Notification.show("Task from " + removeTask.getCompany() + " was selected");
+        Notification.show(
+                "Task from " + removeTask.getCompany() + " was selected",
+                2000,
+                Notification.Position.TOP_END);
 
         setVisible(true);
         editMessage.focus();

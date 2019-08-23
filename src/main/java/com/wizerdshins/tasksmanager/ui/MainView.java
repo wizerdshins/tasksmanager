@@ -61,7 +61,7 @@ public class MainView extends VerticalLayout {
         companySelect.setItems(companyRepository.findAll());
 
         Button addTask = new Button("Add");
-        Button editTask = new Button("Edit");
+//        Button editTask = new Button("Edit"); wtf?
         Binder<Task> taskBinder = new Binder<>(Task.class);
 
         taskBinder.forField(taskMessageField)
