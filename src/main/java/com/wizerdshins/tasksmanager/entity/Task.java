@@ -2,8 +2,11 @@ package com.wizerdshins.tasksmanager.entity;
 
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.util.Date;
+import java.time.*;
+
+//import java.time.LocalDate;
+import java.time.format.*;
 
 @Entity
 public class Task {
@@ -25,10 +28,16 @@ public class Task {
     @JoinColumn(name = "company_id")
     private Company company;
 
+//    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
+//            "dd-MM-yyyy HH:mm");
+//    private String dateFormat;
+
     /* TODO override equals & hashcode */
     /* TODO add annotations */
 
     public Task() {}
+
+    /* TODO delete unused parameter in task constructor */
 
     public Task(String message, Date dateCreate, String status) {
         this.message = message;

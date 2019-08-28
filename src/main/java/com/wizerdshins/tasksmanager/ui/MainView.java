@@ -41,7 +41,7 @@ public class MainView extends VerticalLayout {
         this.taskEditor = taskEditor;
 
         taskGrid = new Grid<>(Task.class);
-        taskGrid.setColumns("message", "company", "dateCreate", "status");
+        taskGrid.setColumns("message", "company", "dateCreate", "dateComplete", "status");
 
         add(new H1("Task Manager"), buildPanel(), taskGrid, taskEditor);
 

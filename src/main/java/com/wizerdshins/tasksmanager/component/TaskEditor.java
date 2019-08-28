@@ -3,6 +3,7 @@ package com.wizerdshins.tasksmanager.component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -23,15 +24,18 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
 //    private CompanyRepository companyRepository;
 
     private Task removeTask;
+    private String status;
 
     private Button saveButton = new Button("Save");
     private Button deleteButton = new Button("Delete");
     private Button cancelButton = new Button("Cancel");
 
+    private ComboBox<String> statusSelect = new ComboBox<>("Status", "open", "WIP", "done");
+
     private TextField editMessage = new TextField();
 
     private HorizontalLayout editFormLayout = new HorizontalLayout(
-            editMessage, saveButton, deleteButton, cancelButton);
+            editMessage, saveButton, deleteButton, cancelButton, statusSelect);
 
     /* TODO add more components */
 
@@ -53,8 +57,10 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
 
         editTaskBinder.forField(editMessage)
                       .bind(Task::getMessage, Task::setMessage);
+        editTaskBinder.forField(statusSelect)
+                .bind(Task::getStatus, Task::setStatus);
 
-        saveButton.getElement().getThemeList().add("primary"); // wtf?
+        saveButton.getElement().getThemeList().add("primary");
         deleteButton.getElement().getThemeList().add("secondary");
         cancelButton.getElement().getThemeList().add("tertiary");
 
@@ -73,7 +79,20 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
     private void save(Task updatedTask) {
 
         Task task = updatedTask;
+        String oldStatus = updatedTask.getStatus();
+        statusSelect.addValueChangeListener(event -> {
+           if (event.getValue().isEmpty()) {
+               status = oldStatus;
+           } else {
+               status = event.getValue();
+           }
+        });
+
+        // TODO fix update status
+
         updatedTask.setMessage(editMessage.getValue());
+        updatedTask.setStatus(status);
+
         taskRepository.save(task);
         Notification.show(
                 "Task \'" + removeTask.getMessage() + "\' has been edited",
