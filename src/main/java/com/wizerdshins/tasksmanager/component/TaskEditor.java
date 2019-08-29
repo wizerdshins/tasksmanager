@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -14,7 +15,11 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import com.wizerdshins.tasksmanager.entity.Task;
 import com.wizerdshins.tasksmanager.repository.CompanyRepository;
 import com.wizerdshins.tasksmanager.repository.TaskRepository;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.time.LocalDate;
+import java.util.Date;
 
 @SpringComponent
 @UIScope
@@ -23,6 +28,8 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
     private TaskRepository taskRepository;
 //    private CompanyRepository companyRepository;
 
+    /* TODO fix Task name */
+
     private Task removeTask;
     private String status;
 
@@ -30,12 +37,17 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
     private Button deleteButton = new Button("Delete");
     private Button cancelButton = new Button("Cancel");
 
-    private ComboBox<String> statusSelect = new ComboBox<>("Status", "open", "WIP", "done");
+    private ComboBox<String> statusSelect = new ComboBox<>(
+            "Status", "open", "WIP", "done");
 
-    private TextField editMessage = new TextField();
+    private TextField editMessage = new TextField("Message");
 
     private HorizontalLayout editFormLayout = new HorizontalLayout(
-            editMessage, saveButton, deleteButton, cancelButton, statusSelect);
+            editMessage, statusSelect);
+    private HorizontalLayout buttonLayout = new HorizontalLayout(
+            saveButton, deleteButton, cancelButton);
+
+    private Div editFormWrapper = new Div(editFormLayout, buttonLayout);
 
     /* TODO add more components */
 
@@ -53,12 +65,16 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
 
         this.taskRepository = taskRepository;
 
-        add(editFormLayout);
+        add(editFormWrapper);
 
         editTaskBinder.forField(editMessage)
                       .bind(Task::getMessage, Task::setMessage);
         editTaskBinder.forField(statusSelect)
                 .bind(Task::getStatus, Task::setStatus);
+
+        statusSelect.addValueChangeListener(event -> {
+           status = event.getValue();
+        });
 
         saveButton.getElement().getThemeList().add("primary");
         deleteButton.getElement().getThemeList().add("secondary");
@@ -78,22 +94,16 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
 
     private void save(Task updatedTask) {
 
-        Task task = updatedTask;
-        String oldStatus = updatedTask.getStatus();
-        statusSelect.addValueChangeListener(event -> {
-           if (event.getValue().isEmpty()) {
-               status = oldStatus;
-           } else {
-               status = event.getValue();
-           }
-        });
-
-        // TODO fix update status
+        if (status.equals("done")) {
+            updatedTask.setDateComplete(LocalDate.now());
+        }
 
         updatedTask.setMessage(editMessage.getValue());
-        updatedTask.setStatus(status);
+        updatedTask.setStatus(statusSelect.getValue());
 
-        taskRepository.save(task);
+        // TODO fix date decrement bug
+
+        taskRepository.save(updatedTask);
         Notification.show(
                 "Task \'" + removeTask.getMessage() + "\' has been edited",
                 2000,

@@ -4,14 +4,18 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
+import com.wizerdshins.tasksmanager.component.CompanyEditor;
 import com.wizerdshins.tasksmanager.component.TaskEditor;
 import com.wizerdshins.tasksmanager.entity.Company;
 import com.wizerdshins.tasksmanager.entity.Task;
@@ -46,7 +50,6 @@ public class MainView extends VerticalLayout {
         add(new H1("Task Manager"), buildPanel(), taskGrid, taskEditor);
 
         showAllTasks();
-//        taskGrid.setItems(taskRepository.findAll());
 
         taskEditor.setChangeHandler(() -> {
             taskEditor.setVisible(true);
@@ -61,8 +64,11 @@ public class MainView extends VerticalLayout {
         companySelect.setItems(companyRepository.findAll());
 
         Button addTask = new Button("Add");
-//        Button editTask = new Button("Edit"); wtf?
+
+        Button addCompany = new Button("New Company");
+
         Binder<Task> taskBinder = new Binder<>(Task.class);
+//        Binder<Company> companyBinder = new Binder<>(Company.class);
 
         taskBinder.forField(taskMessageField)
                 .asRequired("Please, add task message")
@@ -78,10 +84,6 @@ public class MainView extends VerticalLayout {
 
         // TODO how to write a comments in code
 
-//        addTask.addClickListener(click -> {
-////            taskEditor.editTask(new Task("", new Date(), ""));
-////        });
-
         addTask.addClickListener(click -> {
            Task newTask = new Task("", new Date(), "");
            try {
@@ -89,9 +91,19 @@ public class MainView extends VerticalLayout {
                taskRepository.save(newTask);
                taskGrid.setItems(taskRepository.findAll());
                taskBinder.readBean(new Task());
+
+               Notification.show(
+                       "Task \'" + newTask.getMessage() + "\' has been added",
+                       2000,
+                       Notification.Position.TOP_END);
+
            } catch (ValidationException e) {
                e.printStackTrace();
            }
+        });
+
+        addCompany.addClickListener(click -> {
+
         });
 
         taskGrid.asSingleSelect().addValueChangeListener(event -> {
@@ -100,13 +112,13 @@ public class MainView extends VerticalLayout {
 
 
         HorizontalLayout formLayout = new HorizontalLayout(
-                taskMessageField, companySelect, addTask);
+                taskMessageField, companySelect, addTask, addCompany);
         formLayout.setDefaultVerticalComponentAlignment(Alignment.BASELINE);
 
-        Div wraper = new Div(formLayout);
-        wraper.setWidth("100%");
+        Div menuWrapper = new Div(formLayout);
+        menuWrapper.setWidth("100%");
 
-        return wraper;
+        return menuWrapper;
     }
 
     private void showAllTasks() {
