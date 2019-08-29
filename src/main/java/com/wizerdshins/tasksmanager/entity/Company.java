@@ -19,7 +19,7 @@ public class Company {
     /* TODO override equals & hashcode */
 
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
-    List<Task> tasks;
+    private List<Task> tasks;
 
     public Company() {}
 

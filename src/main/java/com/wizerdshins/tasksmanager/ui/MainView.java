@@ -3,6 +3,8 @@ package com.wizerdshins.tasksmanager.ui;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
@@ -68,7 +70,7 @@ public class MainView extends VerticalLayout {
         Button addCompany = new Button("New Company");
 
         Binder<Task> taskBinder = new Binder<>(Task.class);
-//        Binder<Company> companyBinder = new Binder<>(Company.class);
+        Binder<Company> companyBinder = new Binder<>(Company.class);
 
         taskBinder.forField(taskMessageField)
                 .asRequired("Please, add task message")
@@ -102,9 +104,60 @@ public class MainView extends VerticalLayout {
            }
         });
 
-        addCompany.addClickListener(click -> {
+        /* some little shit */
 
+        Button companyEdit = new Button("Save");
+        Button cancelCompanyEdit = new Button("Cancel");
+
+        companyEdit.getElement().getThemeList().add("primary");
+        cancelCompanyEdit.getElement().getThemeList().add("secondary");
+
+        TextField companyNameField = new TextField("Company name");
+        TextField companyAddressField = new TextField("Address");
+        TextField companyPhoneField = new TextField("Phone");
+
+        HorizontalLayout editCompanyFields = new HorizontalLayout(
+                companyNameField, companyAddressField, companyPhoneField);
+        HorizontalLayout editCompanyButtons = new HorizontalLayout(
+                companyEdit, cancelCompanyEdit);
+
+        Dialog companyEditDialog = new Dialog();
+
+        companyEditDialog.setCloseOnEsc(true);
+        companyEditDialog.add(editCompanyFields, editCompanyButtons);
+
+        companyBinder.forField(companyNameField)
+                     .bind(Company::getName, Company::setName);
+        companyBinder.forField(companyAddressField)
+                     .bind(Company::getAddress, Company::setAddress);
+        companyBinder.forField(companyPhoneField)
+                     .bind(Company::getPhone, Company::setPhone);
+
+        addCompany.addClickListener(click -> {
+            companyEditDialog.open();
         });
+
+        companyEdit.addClickListener(click -> {
+           Company newCompany = new Company("", "", "");
+           try {
+               companyBinder.writeBean(newCompany);
+               companyRepository.save(newCompany);
+               companyBinder.readBean(new Company());
+               companySelect.setItems(companyRepository.findAll());
+
+               Notification.show("Company \'" + newCompany.getName() + "\' has been added",
+                       2000,
+                       Notification.Position.TOP_END);
+           } catch (ValidationException e) {
+               e.printStackTrace();
+           }
+        });
+
+        cancelCompanyEdit.addClickListener(click -> {
+           companyEditDialog.close();
+        });
+
+        /* some little shit */
 
         taskGrid.asSingleSelect().addValueChangeListener(event -> {
            taskEditor.editTask(event.getValue());

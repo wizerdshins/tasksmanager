@@ -28,10 +28,6 @@ public class Task {
     @JoinColumn(name = "company_id")
     private Company company;
 
-//    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
-//            "dd-MM-yyyy HH:mm");
-//    private String dateFormat;
-
     /* TODO override equals & hashcode */
     /* TODO add annotations */
 
