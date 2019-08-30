@@ -56,23 +56,68 @@ public class MainView extends VerticalLayout {
 
     private Component buildPanel() {
 
-        TextField taskMessageField = new TextField("Task");
+        /*
+        components for adding new task
+         */
+
+        Button addTask = new Button("Add");
+
         ComboBox<Company> companySelect = new ComboBox<>("Company");
         companySelect.setItems(companyRepository.findAll());
 
-        Button addTask = new Button("Add");
-        Button addCompany = new Button("New Company");
+        TextField taskMessageField = new TextField("Task");
 
         Binder<Task> taskBinder = new Binder<>(Task.class);
-        Binder<Company> companyBinder = new Binder<>(Company.class);
 
         taskBinder.forField(taskMessageField)
-                .asRequired("Please, add task message")
+                .asRequired("Please, enter a task message")
                 .bind("message");
-
         taskBinder.forField(companySelect)
                 .asRequired("Please, select a company")
                 .bind("company");
+
+        /*
+        components for adding new company
+         */
+
+        Button addCompany = new Button("New Company");
+
+        Button companyEdit = new Button("Save");
+        Button cancelCompanyEdit = new Button("Cancel");
+
+        companyEdit.getElement().getThemeList().add("primary");
+        cancelCompanyEdit.getElement().getThemeList().add("secondary");
+
+        Grid<Company> companyGrid = new Grid<>(Company.class);
+        companyGrid.setColumns("name", "address", "phone");
+        companyGrid.setItems(companyRepository.findAll());
+
+        TextField companyNameField = new TextField("Company name");
+        TextField companyAddressField = new TextField("Address");
+        TextField companyPhoneField = new TextField("Phone");
+
+        Binder<Company> companyBinder = new Binder<>(Company.class);
+
+        companyBinder.forField(companyNameField)
+                     .asRequired("Please, enter a company name")
+                     .bind(Company::getName, Company::setName);
+        companyBinder.forField(companyAddressField)
+                     .asRequired("Please, enter a company address")
+                     .bind(Company::getAddress, Company::setAddress);
+        companyBinder.forField(companyPhoneField)
+                     .asRequired("Please, enter a company phone")
+                     .bind(Company::getPhone, Company::setPhone);
+
+        HorizontalLayout editCompanyFields = new HorizontalLayout(
+                companyNameField, companyAddressField, companyPhoneField);
+        HorizontalLayout companyGridLayout = new HorizontalLayout(companyGrid);
+        HorizontalLayout editCompanyButtons = new HorizontalLayout(
+                companyEdit, companyGridLayout, cancelCompanyEdit);
+
+        Dialog companyEditDialog = new Dialog();
+
+        companyEditDialog.setCloseOnEsc(true);
+        companyEditDialog.add(editCompanyFields, companyGridLayout, editCompanyButtons);
 
         /*
         button's listeners
@@ -95,43 +140,6 @@ public class MainView extends VerticalLayout {
                e.printStackTrace();
            }
         });
-
-        /* some little shit */
-
-        Button companyEdit = new Button("Save");
-        Button cancelCompanyEdit = new Button("Cancel");
-
-        companyEdit.getElement().getThemeList().add("primary");
-        cancelCompanyEdit.getElement().getThemeList().add("secondary");
-
-        Grid<Company> companyGrid = new Grid<>(Company.class);
-        companyGrid.setColumns("name", "address", "phone");
-        companyGrid.setItems(companyRepository.findAll());
-
-        TextField companyNameField = new TextField("Company name");
-        TextField companyAddressField = new TextField("Address");
-        TextField companyPhoneField = new TextField("Phone");
-
-        HorizontalLayout editCompanyFields = new HorizontalLayout(
-                companyNameField, companyAddressField, companyPhoneField);
-        HorizontalLayout companyGridLayout = new HorizontalLayout(companyGrid);
-        HorizontalLayout editCompanyButtons = new HorizontalLayout(
-                companyEdit, companyGridLayout, cancelCompanyEdit);
-
-        Dialog companyEditDialog = new Dialog();
-
-        companyEditDialog.setCloseOnEsc(true);
-        companyEditDialog.add(editCompanyFields, companyGridLayout, editCompanyButtons);
-
-        companyBinder.forField(companyNameField)
-                     .asRequired("Please, enter a company name")
-                     .bind(Company::getName, Company::setName);
-        companyBinder.forField(companyAddressField)
-                     .asRequired("Please, enter a company address")
-                     .bind(Company::getAddress, Company::setAddress);
-        companyBinder.forField(companyPhoneField)
-                     .asRequired("Please, enter a company phone")
-                     .bind(Company::getPhone, Company::setPhone);
 
         addCompany.addClickListener(click -> {
             companyEditDialog.open();
@@ -159,7 +167,9 @@ public class MainView extends VerticalLayout {
            companyEditDialog.close();
         });
 
-        /* some little shit */
+        /*
+        event for task editor enabling
+         */
 
         taskGrid.asSingleSelect().addValueChangeListener(event -> {
            taskEditor.editTask(event.getValue());

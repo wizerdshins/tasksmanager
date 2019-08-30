@@ -16,8 +16,6 @@ public class Company {
     @Column
     private String phone;
 
-    /* TODO override equals & hashcode */
-
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
     private List<Task> tasks;
 

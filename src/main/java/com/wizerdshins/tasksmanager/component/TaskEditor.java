@@ -24,9 +24,7 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
 
     private TaskRepository taskRepository;
 
-    /* TODO fix Task name */
-
-    private Task removeTask;
+    private Task addedTask;
     private String status;
 
     private Button saveButton = new Button("Save");
@@ -38,14 +36,14 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
 
     private TextField editMessage = new TextField("Message");
 
+    private Binder<Task> editTaskBinder = new Binder<>(Task.class);
+
     private HorizontalLayout editFormLayout = new HorizontalLayout(
             editMessage, statusSelect);
     private HorizontalLayout buttonLayout = new HorizontalLayout(
             saveButton, deleteButton, cancelButton);
 
     private Div editFormWrapper = new Div(editFormLayout, buttonLayout);
-
-    private Binder<Task> editTaskBinder = new Binder<>(Task.class);
 
     private ChangeHandler changeHandler;
 
@@ -73,9 +71,9 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
         deleteButton.getElement().getThemeList().add("secondary");
         cancelButton.getElement().getThemeList().add("tertiary");
 
-        addKeyPressListener(Key.ENTER, click -> save(removeTask));
+        addKeyPressListener(Key.ENTER, click -> save(addedTask));
 
-        saveButton.addClickListener(click -> save(removeTask));
+        saveButton.addClickListener(click -> save(addedTask));
         deleteButton.addClickListener(click -> delete());
         cancelButton.addClickListener(click -> {
            setVisible(false);
@@ -94,11 +92,9 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
         updatedTask.setMessage(editMessage.getValue());
         updatedTask.setStatus(statusSelect.getValue());
 
-        // TODO fix date decrement bug
-
         taskRepository.save(updatedTask);
         Notification.show(
-                "Task \'" + removeTask.getMessage() + "\' has been edited",
+                "Task \'" + addedTask.getMessage() + "\' has been edited",
                 2000,
                 Notification.Position.TOP_END);
 
@@ -106,9 +102,9 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
     }
 
     private void delete() {
-        taskRepository.delete(removeTask);
+        taskRepository.delete(addedTask);
         Notification.show(
-                "Task \'" + removeTask.getMessage() + "\' has been deleted",
+                "Task \'" + addedTask.getMessage() + "\' has been deleted",
                 2000,
                 Notification.Position.TOP_END);
 
@@ -123,14 +119,14 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
         }
 
         if (task.getId() != null) {
-            this.removeTask = taskRepository.findById(task.getId()).orElse(task);
+            this.addedTask = taskRepository.findById(task.getId()).orElse(task);
         } else {
-            this.removeTask = task;
+            this.addedTask = task;
         }
         editTaskBinder.setBean(task);
 
         Notification.show(
-                "Task from " + removeTask.getCompany() + " was selected",
+                "Task from " + addedTask.getCompany() + " was selected",
                 2000,
                 Notification.Position.TOP_END);
 

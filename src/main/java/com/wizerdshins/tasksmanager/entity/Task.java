@@ -28,11 +28,7 @@ public class Task {
     @JoinColumn(name = "company_id")
     private Company company;
 
-    /* TODO override equals & hashcode */
-
     public Task() {}
-
-    /* TODO delete unused parameter in task constructor */
 
     public Task(String message, Date dateCreate, String status) {
         this.message = message;
