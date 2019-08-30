@@ -29,7 +29,6 @@ public class Task {
     private Company company;
 
     /* TODO override equals & hashcode */
-    /* TODO add annotations */
 
     public Task() {}
 

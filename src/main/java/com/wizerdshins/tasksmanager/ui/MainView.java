@@ -4,9 +4,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.notification.Notification;
@@ -15,9 +13,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
-import com.wizerdshins.tasksmanager.component.CompanyEditor;
 import com.wizerdshins.tasksmanager.component.TaskEditor;
 import com.wizerdshins.tasksmanager.entity.Company;
 import com.wizerdshins.tasksmanager.entity.Task;
@@ -43,7 +39,6 @@ public class MainView extends VerticalLayout {
 
         this.companyRepository = companyRepository;
         this.taskRepository = taskRepository;
-
         this.taskEditor = taskEditor;
 
         taskGrid = new Grid<>(Task.class);
@@ -66,7 +61,6 @@ public class MainView extends VerticalLayout {
         companySelect.setItems(companyRepository.findAll());
 
         Button addTask = new Button("Add");
-
         Button addCompany = new Button("New Company");
 
         Binder<Task> taskBinder = new Binder<>(Task.class);
@@ -81,10 +75,8 @@ public class MainView extends VerticalLayout {
                 .bind("company");
 
         /*
-        listeners work description
+        button's listeners
          */
-
-        // TODO how to write a comments in code
 
         addTask.addClickListener(click -> {
            Task newTask = new Task("", new Date(), "");
@@ -112,25 +104,33 @@ public class MainView extends VerticalLayout {
         companyEdit.getElement().getThemeList().add("primary");
         cancelCompanyEdit.getElement().getThemeList().add("secondary");
 
+        Grid<Company> companyGrid = new Grid<>(Company.class);
+        companyGrid.setColumns("name", "address", "phone");
+        companyGrid.setItems(companyRepository.findAll());
+
         TextField companyNameField = new TextField("Company name");
         TextField companyAddressField = new TextField("Address");
         TextField companyPhoneField = new TextField("Phone");
 
         HorizontalLayout editCompanyFields = new HorizontalLayout(
                 companyNameField, companyAddressField, companyPhoneField);
+        HorizontalLayout companyGridLayout = new HorizontalLayout(companyGrid);
         HorizontalLayout editCompanyButtons = new HorizontalLayout(
-                companyEdit, cancelCompanyEdit);
+                companyEdit, companyGridLayout, cancelCompanyEdit);
 
         Dialog companyEditDialog = new Dialog();
 
         companyEditDialog.setCloseOnEsc(true);
-        companyEditDialog.add(editCompanyFields, editCompanyButtons);
+        companyEditDialog.add(editCompanyFields, companyGridLayout, editCompanyButtons);
 
         companyBinder.forField(companyNameField)
+                     .asRequired("Please, enter a company name")
                      .bind(Company::getName, Company::setName);
         companyBinder.forField(companyAddressField)
+                     .asRequired("Please, enter a company address")
                      .bind(Company::getAddress, Company::setAddress);
         companyBinder.forField(companyPhoneField)
+                     .asRequired("Please, enter a company phone")
                      .bind(Company::getPhone, Company::setPhone);
 
         addCompany.addClickListener(click -> {
@@ -143,7 +143,9 @@ public class MainView extends VerticalLayout {
                companyBinder.writeBean(newCompany);
                companyRepository.save(newCompany);
                companyBinder.readBean(new Company());
+
                companySelect.setItems(companyRepository.findAll());
+               companyGrid.setItems(companyRepository.findAll());
 
                Notification.show("Company \'" + newCompany.getName() + "\' has been added",
                        2000,
@@ -162,7 +164,6 @@ public class MainView extends VerticalLayout {
         taskGrid.asSingleSelect().addValueChangeListener(event -> {
            taskEditor.editTask(event.getValue());
         });
-
 
         HorizontalLayout formLayout = new HorizontalLayout(
                 taskMessageField, companySelect, addTask, addCompany);

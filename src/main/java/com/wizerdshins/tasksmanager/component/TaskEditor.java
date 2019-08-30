@@ -13,20 +13,16 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.wizerdshins.tasksmanager.entity.Task;
-import com.wizerdshins.tasksmanager.repository.CompanyRepository;
 import com.wizerdshins.tasksmanager.repository.TaskRepository;
-import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @SpringComponent
 @UIScope
 public class TaskEditor extends VerticalLayout implements KeyNotifier {
 
     private TaskRepository taskRepository;
-//    private CompanyRepository companyRepository;
 
     /* TODO fix Task name */
 
@@ -49,8 +45,6 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
 
     private Div editFormWrapper = new Div(editFormLayout, buttonLayout);
 
-    /* TODO add more components */
-
     private Binder<Task> editTaskBinder = new Binder<>(Task.class);
 
     private ChangeHandler changeHandler;
@@ -58,7 +52,6 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
     public interface ChangeHandler {
         void onChange();
     }
-
 
     @Autowired
     public TaskEditor(TaskRepository taskRepository) {
