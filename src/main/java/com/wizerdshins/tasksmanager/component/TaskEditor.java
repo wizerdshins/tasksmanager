@@ -14,6 +14,7 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.wizerdshins.tasksmanager.entity.Task;
 import com.wizerdshins.tasksmanager.repository.TaskRepository;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
@@ -21,6 +22,8 @@ import java.time.LocalDate;
 @SpringComponent
 @UIScope
 public class TaskEditor extends VerticalLayout implements KeyNotifier {
+
+    private static final Logger log = Logger.getLogger(TaskEditor.class);
 
     private TaskRepository taskRepository;
 
@@ -85,7 +88,14 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
 
     private void save(Task updatedTask) {
 
+        log.info("Start editing... ");
+
+        boolean isDone = false;
         if (status.equals("done")) {
+            isDone = true;
+            log.info("Task \'" + updatedTask.getMessage() +
+                    "\' from " + updatedTask.getCompany() +
+                    " was successfully completed");
             updatedTask.setDateComplete(LocalDate.now());
         }
 
@@ -93,6 +103,12 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
         updatedTask.setStatus(statusSelect.getValue());
 
         taskRepository.save(updatedTask);
+        if (!isDone) {
+            log.info("Task \'" + addedTask.getMessage() +
+                    "\' from " + addedTask.getCompany() +
+                    " has been edited");
+        }
+
         Notification.show(
                 "Task \'" + addedTask.getMessage() + "\' has been edited",
                 2000,
@@ -103,6 +119,11 @@ public class TaskEditor extends VerticalLayout implements KeyNotifier {
 
     private void delete() {
         taskRepository.delete(addedTask);
+
+        log.info("Task \'" + addedTask.getMessage() +
+                "\' from " + addedTask.getCompany() +
+                " has been deleted");
+
         Notification.show(
                 "Task \'" + addedTask.getMessage() + "\' has been deleted",
                 2000,

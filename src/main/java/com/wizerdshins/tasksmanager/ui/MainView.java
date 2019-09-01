@@ -19,12 +19,15 @@ import com.wizerdshins.tasksmanager.entity.Company;
 import com.wizerdshins.tasksmanager.entity.Task;
 import com.wizerdshins.tasksmanager.repository.CompanyRepository;
 import com.wizerdshins.tasksmanager.repository.TaskRepository;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
 @Route
 public class MainView extends VerticalLayout {
+
+    private static final Logger log = Logger.getLogger(MainView.class);
 
     private TaskRepository taskRepository;
     private CompanyRepository companyRepository;
@@ -36,6 +39,8 @@ public class MainView extends VerticalLayout {
     public MainView(TaskRepository taskRepository,
                     CompanyRepository companyRepository,
                     TaskEditor taskEditor) {
+
+        log.info("Application is running");
 
         this.companyRepository = companyRepository;
         this.taskRepository = taskRepository;
@@ -124,12 +129,17 @@ public class MainView extends VerticalLayout {
          */
 
         addTask.addClickListener(click -> {
-           Task newTask = new Task("", new Date(), "");
-           try {
+            log.info("Adding task... ");
+            Task newTask = new Task("", new Date(), "");
+            try {
                taskBinder.writeBean(newTask);
                taskRepository.save(newTask);
                taskGrid.setItems(taskRepository.findAll());
                taskBinder.readBean(new Task());
+
+               log.info("Task \'" + newTask.getMessage() +
+                       "\' from " + newTask.getCompany() +
+                       " was successfully added");
 
                Notification.show(
                        "Task \'" + newTask.getMessage() + "\' has been added",
@@ -137,6 +147,7 @@ public class MainView extends VerticalLayout {
                        Notification.Position.TOP_END);
 
            } catch (ValidationException e) {
+               log.warn("Task validation error", e);
                e.printStackTrace();
            }
         });
@@ -146,8 +157,10 @@ public class MainView extends VerticalLayout {
         });
 
         companyEdit.addClickListener(click -> {
-           Company newCompany = new Company("", "", "");
-           try {
+
+            log.info("Adding company... ");
+            Company newCompany = new Company("", "", "");
+            try {
                companyBinder.writeBean(newCompany);
                companyRepository.save(newCompany);
                companyBinder.readBean(new Company());
@@ -155,10 +168,15 @@ public class MainView extends VerticalLayout {
                companySelect.setItems(companyRepository.findAll());
                companyGrid.setItems(companyRepository.findAll());
 
+               log.info("Company \'" + newCompany.getName() +
+                       " was successfully added");
+
                Notification.show("Company \'" + newCompany.getName() + "\' has been added",
                        2000,
                        Notification.Position.TOP_END);
+
            } catch (ValidationException e) {
+               log.warn("Company validation error", e);
                e.printStackTrace();
            }
         });
