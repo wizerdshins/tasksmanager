@@ -5,9 +5,6 @@ import javax.persistence.*;
 import java.util.Date;
 import java.time.*;
 
-//import java.time.LocalDate;
-import java.time.format.*;
-
 @Entity
 public class Task {
 

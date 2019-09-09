@@ -12,9 +12,12 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
+
 import com.wizerdshins.tasksmanager.entity.Task;
 import com.wizerdshins.tasksmanager.repository.TaskRepository;
+
 import org.apache.log4j.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;

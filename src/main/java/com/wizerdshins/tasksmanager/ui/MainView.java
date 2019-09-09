@@ -14,12 +14,15 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.Route;
+
 import com.wizerdshins.tasksmanager.component.TaskEditor;
 import com.wizerdshins.tasksmanager.entity.Company;
 import com.wizerdshins.tasksmanager.entity.Task;
 import com.wizerdshins.tasksmanager.repository.CompanyRepository;
 import com.wizerdshins.tasksmanager.repository.TaskRepository;
+
 import org.apache.log4j.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
