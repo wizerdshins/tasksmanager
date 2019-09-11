@@ -1,28 +1,37 @@
 package com.wizerdshins.tasksmanager.entity;
 
+import com.fasterxml.jackson.annotation.*;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.time.*;
 
 @Entity
+@JsonAutoDetect
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 public class Task {
 
     @Id
     @GeneratedValue
     private Integer id;
-
     @Column
     private String message;
     @Column(name = "date_create")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateCreate;
     @Column(name = "date_complete")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateComplete;
     @Column
     private String status;
 
     @ManyToOne
     @JoinColumn(name = "company_id")
+    @JsonIgnore
     private Company company;
 
     public Task() {}

@@ -7,9 +7,11 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
@@ -21,6 +23,7 @@ import com.wizerdshins.tasksmanager.entity.Task;
 import com.wizerdshins.tasksmanager.repository.CompanyRepository;
 import com.wizerdshins.tasksmanager.repository.TaskRepository;
 
+import com.wizerdshins.tasksmanager.service.WriterService;
 import org.apache.log4j.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +35,15 @@ public class MainView extends VerticalLayout {
 
     private static final Logger log = Logger.getLogger(MainView.class);
 
+    private boolean isJson = false;
+
     private TaskRepository taskRepository;
     private CompanyRepository companyRepository;
 
     private Grid<Task> taskGrid;
     private TaskEditor taskEditor;
+
+    private WriterService writerService;
 
     @Autowired
     public MainView(TaskRepository taskRepository,
@@ -56,6 +63,8 @@ public class MainView extends VerticalLayout {
 
         showAllTasks();
 
+        writerService = new WriterService();
+
         taskEditor.setChangeHandler(() -> {
             taskEditor.setVisible(true);
             showAllTasks();
@@ -68,7 +77,7 @@ public class MainView extends VerticalLayout {
         components for adding new task
          */
 
-        Button addTask = new Button("Add");
+        Button addTask = new Button("Add Task"); // old value "Add"
 
         ComboBox<Company> companySelect = new ComboBox<>("Company");
         companySelect.setItems(companyRepository.findAll());
@@ -88,7 +97,7 @@ public class MainView extends VerticalLayout {
         components for adding new company
          */
 
-        Button addCompany = new Button("New Company");
+        Button addCompany = new Button("Add Company"); // old value "New Company"
 
         Button companyEdit = new Button("Save");
         Button cancelCompanyEdit = new Button("Cancel");
@@ -128,6 +137,32 @@ public class MainView extends VerticalLayout {
         companyEditDialog.add(editCompanyFields, companyGridLayout, editCompanyButtons);
 
         /*
+        components for writing data to a file
+         */
+
+        Button writeDialogButton = new Button("Write"); // TODO fix this title
+        Button startWriteButton = new Button("Write");
+        Button cancelWriteButton = new Button("Cancel");
+
+        startWriteButton.getElement().getThemeList().add("primary");
+        cancelWriteButton.getElement().getThemeList().add("secondary");
+
+        Dialog writeDataDialog = new Dialog();
+
+        Label descriptionLabel = new Label("Please, enter a directory path");
+
+        RadioButtonGroup<String> formatVariations = new RadioButtonGroup<>();
+        formatVariations.setItems("JSON", "Excel file");
+        formatVariations.setLabel("Format");
+
+        TextField pathToFileField = new TextField();
+
+        VerticalLayout writeLayout = new VerticalLayout(descriptionLabel, pathToFileField, formatVariations);
+
+        writeDataDialog.setCloseOnEsc(true);
+        writeDataDialog.add(writeLayout, startWriteButton, cancelWriteButton);
+
+        /*
         button's listeners
          */
 
@@ -160,7 +195,6 @@ public class MainView extends VerticalLayout {
         });
 
         companyEdit.addClickListener(click -> {
-
             log.info("Adding company... ");
             Company newCompany = new Company("", "", "");
             try {
@@ -188,6 +222,33 @@ public class MainView extends VerticalLayout {
            companyEditDialog.close();
         });
 
+        writeDialogButton.addClickListener(click -> {
+            writeDataDialog.open();
+        });
+
+        formatVariations.addValueChangeListener(event -> {
+            isJson = event.getValue().equals("JSON");
+        });
+
+        startWriteButton.addClickListener(click -> {
+            String path = pathToFileField.getValue();
+            if (isJson) {
+                try {
+                    writerService.write(path, companyRepository.findAll());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Notification.show("Fuck!");
+            }
+        });
+
+        // TODO add ExcelWriterService
+
+        cancelWriteButton.addClickListener(click -> {
+           writeDataDialog.close();
+        });
+
         /*
         event for task editor enabling
          */
@@ -197,7 +258,7 @@ public class MainView extends VerticalLayout {
         });
 
         HorizontalLayout formLayout = new HorizontalLayout(
-                taskMessageField, companySelect, addTask, addCompany);
+                taskMessageField, companySelect, addTask, addCompany, writeDialogButton);
         formLayout.setDefaultVerticalComponentAlignment(Alignment.BASELINE);
 
         Div menuWrapper = new Div(formLayout);

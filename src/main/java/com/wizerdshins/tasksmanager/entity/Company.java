@@ -1,9 +1,16 @@
 package com.wizerdshins.tasksmanager.entity;
 
+import com.fasterxml.jackson.annotation.*;
+
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
+@JsonAutoDetect
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 public class Company {
 
     @Id
@@ -16,7 +23,7 @@ public class Company {
     @Column
     private String phone;
 
-    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "company", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<Task> tasks;
 
     public Company() {}
