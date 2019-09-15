@@ -23,7 +23,9 @@ import com.wizerdshins.tasksmanager.entity.Task;
 import com.wizerdshins.tasksmanager.repository.CompanyRepository;
 import com.wizerdshins.tasksmanager.repository.TaskRepository;
 
-import com.wizerdshins.tasksmanager.service.WriterService;
+import com.wizerdshins.tasksmanager.util.ExcelWriter;
+import com.wizerdshins.tasksmanager.util.JsonWriter;
+
 import org.apache.log4j.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,7 @@ public class MainView extends VerticalLayout {
     private static final Logger log = Logger.getLogger(MainView.class);
 
     private boolean isJson = false;
+    private boolean isWriteEventEmpty = true;
 
     private TaskRepository taskRepository;
     private CompanyRepository companyRepository;
@@ -43,7 +46,8 @@ public class MainView extends VerticalLayout {
     private Grid<Task> taskGrid;
     private TaskEditor taskEditor;
 
-    private WriterService writerService;
+    private JsonWriter jsonWriter;
+    private ExcelWriter excelWriter;
 
     @Autowired
     public MainView(TaskRepository taskRepository,
@@ -63,7 +67,8 @@ public class MainView extends VerticalLayout {
 
         showAllTasks();
 
-        writerService = new WriterService();
+        jsonWriter = new JsonWriter();
+        excelWriter = new ExcelWriter();
 
         taskEditor.setChangeHandler(() -> {
             taskEditor.setVisible(true);
@@ -222,28 +227,63 @@ public class MainView extends VerticalLayout {
            companyEditDialog.close();
         });
 
+        /*
+        writing to file
+         */
+
         writeDialogButton.addClickListener(click -> {
             writeDataDialog.open();
         });
 
         formatVariations.addValueChangeListener(event -> {
+            isWriteEventEmpty = event.getValue().isEmpty();
             isJson = event.getValue().equals("JSON");
         });
 
         startWriteButton.addClickListener(click -> {
+
+            if (isWriteEventEmpty) {
+                Notification.show("Please, select a file format",
+                        2000,
+                        Notification.Position.TOP_END);
+                return;
+            }
+
             String path = pathToFileField.getValue();
+            if (path.equals("")) {
+                Notification.show("Please, enter a directory path",
+                        2000,
+                        Notification.Position.TOP_END);
+                return;
+            }
+
+            log.info("Start writing...");
             if (isJson) {
                 try {
-                    writerService.write(path, companyRepository.findAll());
+                    jsonWriter.write(path, companyRepository.findAll());
+                    log.info("Results were recorder in .txt to \'" + path + "\' directory");
+
+                    Notification.show("Results were recorded in .txt",
+                            2000,
+                            Notification.Position.TOP_END);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             } else {
-                Notification.show("Fuck!");
+                try {
+                    excelWriter.write(path, taskRepository.findAll());
+                    log.info("Results were recorder in .xls to \'" + path + "\' directory");
+
+                    Notification.show("Results were recorded in .xls",
+                            2000,
+                            Notification.Position.TOP_END);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
-
-        // TODO add ExcelWriterService
 
         cancelWriteButton.addClickListener(click -> {
            writeDataDialog.close();
